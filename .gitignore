@@ -1,0 +1,7 @@
+/target/
+
+.vscode/
+*.iml
+
+Thumbs.db
+desktop.ini
