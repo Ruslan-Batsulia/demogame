@@ -10,22 +10,28 @@ use bevy::prelude::*;
 
 use hud::HudPlugin;
 use player::PlayerPlugin;
-use menu::MainMenuPlugin;
+use menu::{
+  MainMenuPlugin,
+  SettingsScreenPlugin,
+};
 use levels::SaveHousePlugin;
 use engine::{
   StatePlugin,
   SettingsPlugin,
   WindowCorePlugin,
+  NavigationPlugin,
 };
 
 fn main() {
-  App::new()
-    .add_plugins(SettingsPlugin)
-    .add_plugins(WindowCorePlugin)
-    .add_plugins(StatePlugin)
-    .add_plugins(MainMenuPlugin)
-    .add_plugins(HudPlugin)
-    .add_plugins(PlayerPlugin)
-    .add_plugins(SaveHousePlugin)
-    .run();
+  App::new().add_plugins((
+    SettingsPlugin,
+    WindowCorePlugin,
+    StatePlugin,
+    MainMenuPlugin,
+    SettingsScreenPlugin,
+    NavigationPlugin,
+    HudPlugin,
+    PlayerPlugin,
+    SaveHousePlugin,
+  )).run();
 }

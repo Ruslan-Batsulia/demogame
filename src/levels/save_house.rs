@@ -1,16 +1,15 @@
 use bevy::prelude::*;
+use crate::engine::GameState;
 use crate::engine::GameSettings;
-use crate::engine::GameState::InGame;
 use crate::player::{Player, PlayerCamera};
 
 pub struct SaveHousePlugin;
-#[derive(Component)]
-struct LevelEntity;
+#[derive(Component)] struct LevelEntity;
 
 impl Plugin for SaveHousePlugin {
   fn build(&self, app: &mut App) {
-    app.add_systems(OnEnter(InGame), spawn_level);
-    app.add_systems(OnExit(InGame), despawn_level);
+    app.add_systems(OnEnter(GameState::InGame), spawn_level)
+      .add_systems(OnExit(GameState::InGame), despawn_level);
   }
 }
 
