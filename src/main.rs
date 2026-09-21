@@ -10,17 +10,13 @@ use bevy::prelude::*;
 
 use hud::HudPlugin;
 use player::PlayerPlugin;
-use menu::{
-  MainMenuPlugin,
-  SettingsScreenPlugin,
-};
+use menu::MainMenuPlugin;
+use menu::SettingsScreenPlugin;
 use levels::SaveHousePlugin;
-use engine::{
-  StatePlugin,
-  SettingsPlugin,
-  WindowCorePlugin,
-  NavigationPlugin,
-};
+use engine::StatePlugin;
+use engine::SettingsPlugin;
+use engine::WindowCorePlugin;
+use engine::NavigationPlugin;
 
 fn main() {
   App::new().add_plugins((

@@ -5,9 +5,12 @@ pub struct MainMenuPlugin;
 
 #[derive(Component)] struct MenuRoot;
 #[derive(Component)] struct RootScreenRoot;
-#[derive(Component)] struct PlayButton;
-#[derive(Component)] struct SettingsButton;
-#[derive(Component)] struct ExitButton;
+#[derive(Component)]
+enum MenuBtn {
+  Play,
+  Settings,
+  Exit,
+}
 
 impl Plugin for MainMenuPlugin {
   fn build(&self, app: &mut App) {
@@ -15,10 +18,8 @@ impl Plugin for MainMenuPlugin {
       .add_systems(OnExit(GameState::MainMenu), despawn_menu)
       .add_systems(OnEnter(MenuScreen::Root), spawn_root_screen)
       .add_systems(OnExit(MenuScreen::Root), despawn_root_screen)
-      .add_systems(Update, button_visual.run_if(in_state(GameState::MainMenu)))
-      .add_systems(Update, handle_settings_button.run_if(in_state(MenuScreen::Root)))
-      .add_systems(Update, handle_exit_button.run_if(in_state(MenuScreen::Root)))
-      .add_systems(Update, handle_play_button.run_if(in_state(MenuScreen::Root)));
+      .add_systems(Update, btn_visual.run_if(in_state(GameState::MainMenu)))
+      .add_systems(Update, handle_btn_click.run_if(in_state(MenuScreen::Root)));
   }
 }
 
@@ -26,7 +27,14 @@ fn spawn_camera(mut commands: Commands) {
   commands.spawn((MenuRoot, Camera2d));
 }
 
-fn menu_button(label: &str) -> impl Bundle {(
+fn label_btn(label: &str) -> impl Bundle {(
+  Text::new(label.to_string()),
+  TextFont { font_size: FontSize::Px(16.0), ..default() },
+  TextColor(Color::WHITE),
+  LineHeight::RelativeToFont(1.0),
+)}
+
+fn menu_btn(label: &str) -> impl Bundle {(
   Button,
   Node {
     width: Val::Px(200.0),
@@ -36,12 +44,7 @@ fn menu_button(label: &str) -> impl Bundle {(
     ..default()
   },
   BackgroundColor(Color::srgb(0.2, 0.2, 0.2)),
-  children![(
-    Text::new(label.to_string()),
-    TextFont { font_size: FontSize::Px(16.0), ..default() },
-    TextColor(Color::WHITE),
-    LineHeight::RelativeToFont(1.0),
-  )],
+  children![(label_btn(&label))],
 )}
 
 fn spawn_root_screen(mut commands: Commands) {
@@ -59,9 +62,9 @@ fn spawn_root_screen(mut commands: Commands) {
     },
     BackgroundColor(Color::srgb(0.1, 0.1, 0.2)),
     children![
-      (PlayButton, menu_button("Play")),
-      (SettingsButton, menu_button("Settings")),
-      (ExitButton, menu_button("Exit")),
+      (MenuBtn::Play, menu_btn("Play")),
+      (MenuBtn::Settings, menu_btn("Settings")),
+      (MenuBtn::Exit, menu_btn("Exit")),
     ],
   ));
 }
@@ -80,7 +83,7 @@ fn despawn_menu(
   for entity in &query { commands.entity(entity).despawn(); }
 }
 
-fn button_visual(
+fn btn_visual(
   mut query: Query<
     (&Interaction, &mut BackgroundColor),
     (Changed<Interaction>, With<Button>)
@@ -95,35 +98,21 @@ fn button_visual(
   }
 }
 
-fn handle_exit_button(
-  query: Query<&Interaction, (Changed<Interaction>, With<ExitButton>)>,
+fn handle_btn_click(
+  query: Query<(&Interaction, &MenuBtn), Changed<Interaction>>,
   mut exit: MessageWriter<AppExit>,
-) {
-  for interaction in &query {
-    if *interaction == Interaction::Pressed {
-      exit.write(AppExit::Success);
-    }
-  }
-}
-
-fn handle_settings_button(
-  query: Query<&Interaction, (Changed<Interaction>, With<SettingsButton>)>,
   mut next_screen: ResMut<NextState<MenuScreen>>,
-) {
-  for interaction in &query {
-    if *interaction == Interaction::Pressed {
-      next_screen.set(MenuScreen::Settings);
-    }
-  }
-}
-
-fn handle_play_button(
-  query: Query<&Interaction, (Changed<Interaction>, With<PlayButton>)>,
   mut next_state: ResMut<NextState<GameState>>,
 ) {
-  for interaction in &query {
-    if *interaction == Interaction::Pressed {
-      next_state.set(GameState::InGame);
+  for (interaction, btn) in &query {
+    if *interaction != Interaction::Pressed {
+      continue;
+    }
+
+    match btn {
+      MenuBtn::Play => next_state.set(GameState::InGame),
+      MenuBtn::Settings => next_screen.set(MenuScreen::Settings),
+      MenuBtn::Exit => { exit.write(AppExit::Success); },
     }
   }
 }
