@@ -5,8 +5,7 @@ pub struct MainMenuPlugin;
 
 #[derive(Component)] struct MenuRoot;
 #[derive(Component)] struct RootScreenRoot;
-#[derive(Component)]
-enum MenuBtn {
+#[derive(Component)] enum MenuBtn {
   Play,
   Settings,
   Exit,
